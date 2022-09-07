@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+# FlightGear Installer
+# locations_defitions
+# This file contains the destination definitions to where files will be located.
+#
+# Author:       Megaf - https://github.com/Megaf - mmegaf [at] gmail [dot] com
+# Date:         03/09/2022
+# GitHub:       https://github.com/Megaf/FlightGear-Installer
+# License:      GPL V3
+
+source libsay # libsay, enables "say" command to print fancy messages.
+
+say "DEBUG: START OF locations_definitions."
+source git_definitions # Settings for git branches and repositories.
+
+# Tells Installer where it is running from.
+script_dir="$(pwd)"
+
+# Where FlightGear should be installed to.
+say "DEBUG: Start of destination selection."
+if [[ "$*" = *"--user"* ]] && [[ ! *"--system"* ]]; then
+    install_destination_root="$HOME"
+    fgdata_destination_root="$HOME/Downloads"
+    fgdata_destination="$fgdata_destination_root/fgdata"
+    applications_dir="$HOME/.local/share/applications"
+    bin_dir="$HOME/.local/bin"
+    lib_dir="$HOME/.local/lib"
+    say "INFO: Selected 'user' install."
+elif [[ "$*" = *"--system"* ]] && [[ ! *"--user"* ]]; then
+    install_destination_root="/opt"
+    fgdata_destination_root="$HOME/Downloads"
+    fgdata_destination="$fgdata_destination_root/fgdata"
+    applications_dir="/usr/share/applications"
+    bin_dir="/usr/local/bin"
+    lib_dir="$HOME/.local/lib"
+    say "INFO: Selected 'system' install."
+elif [[ ! *"--user"* ]] && [[ ! *"--system"* ]]; then
+    say "ERROR: Please tell the installer either '--user' or '--system'."
+    say "From a 'System folder', with '--system'. (FlightGear Installer with '--user' argument."
+    say "From a 'User folder', with '--user'. (FlightGear Installer with '--system' argument."
+    exit 22
+elif [[ *"--user"* ]] && [[ *"--system"* ]]; then
+    say "ERROR: Please specify either '--user' or '--system' but not both at once."
+    exit 22
+else
+    say "ERROR: Something went wrong on 'locations_definitions' when chosing between user or system install."
+    say "INFO: command line args used '$*'"
+    say "INFO: dest=$dest install_destination=$install_destination"
+    say "INFO: applications_dir=$applications_dir bin_dir=$bin_dir lib_dir=$lib_dir"
+    exit 22
+fi
+say "DEBUG: End of destination selection."
+
+## Install destination block
+# Uncomment and edit line below for a custon install destination.
+# install_destination_root="/my/custom/destination"
+
+# Where FlightGear will be installed to.
+install_destination="$install_destination_root/FlightGear-$release"
+
+# Where the source code should be downloaded to.
+source_destination="$HOME/Downloads/FlightGear-Source"
+
+# Temporaty build files location.
+build_destination="/tmp/FlightGear-Build-$release"
+
+system_binary_destination="/usr/bin/flightgear/flightgear"
+system_applications_destination="/usr/share/applications/flightgear-$release.desktop"
+user_binary_destination="$HOME/.local/bin/flightgear"
+user_applications_destination="$HOME/.local/share/applications/flightgear-$release.desktop""
+
+say "DEBUG: END OF locations_definitions."

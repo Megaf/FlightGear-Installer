@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# FlightGear Installer
+# libsay
+# Library that adds the command "say" to print nice looking messages.
+#
+# Author:       Megaf - https://github.com/Megaf - mmegaf [at] gmail [dot] com
+# Date:         03/09/2022
+# GitHub:       https://github.com/Megaf/FlightGear-Installer
+# License:      GPL V3
+
+c_error()
+{
+    tput smul
+    tput setab 0
+    tput setaf 1
+    tput rmul
+}
+
+c_info()
+{
+    tput setab 0
+    tput setaf 2
+}
+
+c_warning()
+{
+    tput smul
+    tput smso
+    tput setab 0
+    tput setaf 3
+    tput rmso
+    tput rmul
+}
+
+c_debug()
+{
+    tput setab 0
+    tput setaf 6
+}
+
+
+print_message()
+{
+    tput sgr0
+    tput bold
+    [[ "$message" == "ERROR:"* ]] || [[ "$message" == "ERR:"* ]] && c_error
+    [[ "$message" == "INFO:"* ]] && c_info
+    [[ "$message" == "WARN:"* ]] || [[ "$message" == "WARNING:"* ]] && c_warning
+    [[ "$message" == "DEBUG:"* ]] && c_debug
+    printf "$message"
+    tput sgr0
+}
+
+say ()
+{
+    message="$*"
+    if [[ ! "$debug" == "true" ]] && [[ ! "$message" == "DEBUG:"* ]] 
+    then
+        say_function
+    elif [[ "$debug" == "true" ]]
+    then
+        say_function
+    fi
+}
+
+say_function ()
+{
+    local length=$(expr length "$message")
+    
+    local spacesize="4"
+    local linesize=$(expr $spacesize + $length + $spacesize)
+    
+    tput sgr0
+    printf "╔"; printf "%0.s═" $(seq 1 $linesize); printf "╗\n"
+    printf "║"; printf "%0.s " $(seq 1 $spacesize); print_message; printf "%0.s " $(seq 1 $spacesize); printf "║\n"
+    printf "╚"; printf "%0.s═" $(seq 1 $linesize); printf "╝\n"
+    tput sgr0
+    
+    unset $* message length spacesize linesize
+}

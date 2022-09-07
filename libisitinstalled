@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# FlightGear Installer
+# libisitinstalled
+# lib "is it installed?", it tries to find a software installed on a standard path.
+#
+# Author:       Megaf - https://github.com/Megaf - mmegaf [at] gmail [dot] com
+# Date:         03/09/2022
+# GitHub:       https://github.com/Megaf/FlightGear-Installer
+# License:      GPL V3
+# Usage:        findthing "software_name"
+# Args:         If something is found, it will create the var "isitinstalled=true" and print it's path.
+# If it is not found, it will set the variable to "isitinstalled=false".
+
+# Set to true to show the path that was found.
+show_path="false"
+
+findthing ()
+{
+    local findthing="$*"
+    if [ -z $(which "$findthing") ]
+    then
+        isitinstalled="false"
+    else
+        isitinstalled="true"
+        [[ "$show_path" == "true" ]] && echo " $(which $findthing)"
+    fi
+}
+

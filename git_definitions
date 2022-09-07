@@ -1,0 +1,156 @@
+#!/bin/bash
+#
+# FlightGear Installer
+# git_definitions
+# This files contains the versions/branches of each components
+# and their Git repositories that you want to use.
+#
+# Author:       Megaf - https://github.com/Megaf - mmegaf [at] gmail [dot] com
+# Date:         03/09/2022
+# GitHub:       https://github.com/Megaf/FlightGear-Installer
+# License:      GPL V3
+
+source libsay # libsay, enables "say" command to print fancy messages.
+git_jobs="9" # Number of simultaneous git download instances.
+
+say "DEBUG: START OF git_definitions."
+say "DEBUG: Selecting components to be downloaded."
+say "DEBUG: Command line args are: '$*'"
+if [[ ! "$*" == *"--fgdata"* ]] && [[ ! "$*" == *"--all"* ]]; then
+    declare -a components=("plib" "openscenegraph" "simgear" "flightgear")
+elif [[ ! "$*" == *"--all"* ]] && [[ "$*" == *"--fgdata"* ]]; then
+    declare -a components=("fgdata")
+elif [[ "$*" == *"--all"* ]] && [[ ! "$*" == *"--fgdata"* ]]; then
+    declare -a components=("plib" "openscenegraph" "simgear" "flightgear" "fgdata")
+elif [[ "$*" == *"--all"* ]] && [[ "$*" == *"--fgdata"* ]]; then
+    say "ERROR: You've chosen to donwload 'all' and 'fgdata' at the same time."
+    say "INFO: Please use either '--fgdata' alone to download just FGDataor '--all' alone to download PLIB, OSG, SG, FG and FGData."
+    say "WARNING: Exiting."
+    exit 22
+else
+    say "ERROR: Something went wrong on 'git_definitions' when defining what to donwnload."
+    say "WARNING: Exiting."
+    exit 22
+fi
+
+remove_component()
+{
+    say "DEBUG: Start of 'remove_component'"
+    local delete=("$*")
+    for target in "${delete[@]}"; do
+        for i in "${!components[@]}"; do
+            if [[ ${components[i]} = $target ]]; then
+                unset 'components[i]'
+            fi
+        done
+    done
+    say "DEBUG: End of 'remove_component'"
+}
+
+say "DEBUG: Start of 'component removing'/'if'."
+[[ "$*" == *"--no-plib"* ]] && to_remove="plib" && say "WARNING: Will not download/build '$to_remove'." && remove_component "$to_remove"
+[[ "$*" == *"--no-osg"* ]] && to_remove="openscenegraph" && say "WARNING: Will not download/build '$to_remove'." && remove_component "$to_remove"
+[[ "$*" == *"--no-sg"* ]] && to_remove="simgear" && say "WARNING: Will not download/build '$to_remove'." && remove_component "$to_remove"
+[[ "$*" == *"--no-fg"* ]] && to_remove="flightgear" && say "WARNING: Will not download/build '$to_remove'." && remove_component "$to_remove"
+say "DEBUG: End of 'component removing'/'if'."
+unset to_remove
+
+[[ "$*" == *"--no-"* ]] && say "WARNING: Not downloading all components!" && say "INFO: Will download/buid '${components[@]}'"
+say "DEBUG: End of 'component removing'."
+
+say "DEBUG: Finished selecting components. Components ${components[@]}"
+
+# GIT Block:
+# default branches 
+#The block of code below is where you can set your custom branches and repos.
+#
+# Current stable branches. Edit those if new versions are released.
+flightgear_branch="release/2020.3"
+simgear_branch="$flightgear_branch"
+fgdata_branch="$flightgear_branch"
+openscenegraph_branch="OpenSceneGraph-3.6"
+plib_branch="master"
+
+# Edit the repositories you want to use on the lines below.
+# Default Git Repositories
+sourceforge_git="https://git.code.sf.net/p/flightgear"
+gitlab_git="https://gitlab.com/flightgear"
+default_repo="$gitlab_git"
+flightgear_repo="$default_repo"
+
+say "DEBUG: Selecting repo to be used."
+# Setting FlightGear repo to be either Gitlab or SourceForge according to users choice.
+if [[ ! "$*" == *"--gitlab"* ]] && [[ ! "$*" == *"--sourceforge"* ]]; then
+    say "DEBUG: No preference passed for FlightGear repo. Using default which is '$default_repo'"
+elif [[ "$*" == *"--gitlab"* ]] && [[ ! "$*" == *"--sourceforge"* ]]; then
+    flightgear_repo="https://gitlab.com/flightgear"
+elif [[ ! "$*" == *"--gitlab"* ]] && [[ "$*" == *"--sourceforge"* ]]; then
+    flightgear_repo="$sourceforge_git"
+elif [[ "$*" == *"--gitlab"* ]] && [[ "$*" == *"--sourceforge"* ]]; then
+    say "ERROR: You selected '--gitlab' and '--sourceforge' at the same time."
+    say "INFO: Please use either '--gitlab' to download from '$gitlab_git' or '--sourceforge' to download from '$sourceforge_git'"
+    exit 22
+else
+    say "ERROR: Something went wrong on 'git_definitions' when selecting a Git repository to download '${components[@]}' from."
+    say "INFO: command line args used are '$*', default_repo='$default_repo', flightgear_repo='$flightgear_repo'."
+    exit 22
+fi
+say "DEBUG: Finished selecting repo. Repo selected for FG/SG/FGDATA is'$flightgear_repo'"
+
+
+# Uncomment and edit the line below to set a custom Git repo for FlightGear
+# flightgear_repo="https/git://my.custom/repo"
+
+flightgear_repo="$default_repo"
+simgear_repo="$flightgear_repo"
+fgdata_repo="$flightgear_repo"
+openscenegraph_repo="https://github.com/openscenegraph"
+plib_repo="https://github.com/Megaf"
+
+say "DEBUG: default_repo=$default_repo"
+say "DEBUG: flightgear_repo=$flightgear_repo"
+say "DEBUG: simgear_repo=$simgear_repo"
+say "DEBUG: fgdata_repo=$fgdata_repo"
+say "DEBUG: openscenegraph_repo=$openscenegraph_repo"
+say "DEBUG: plib_repo=$plib_repo"
+
+say "DEBUG: Selecting branch from command line args."
+# Sets FG branch/version according to command line args.
+if [[ "$*" == *"--next"* ]] && [[ "$*" == *"--stable"* ]]; then
+    say "ERROR: Chose only one option. Either '--stable' for FlightGear Stable '--next' for FlightGear Next/Nightly."
+    exit 22
+elif [[ ! "$*" == *"--next"* ]] && [[ ! "$*" == *"--stable"* ]]; then
+    say "DEBUG: No FlightGear branch/version defined by the user. Selecting Stable."
+    flightgear_branch="$flightgear_branch"
+    say "DEBUG: Selecting branch '$flightgear_branch'."
+elif [[ "$*" == *"--next"* ]] && [[ ! "$*" == *"--stable"* ]]; then
+    flightgear_branch="next"
+    say "DEBUG: Selecting branch '$flightgear_branch'."
+elif [[ "$*" == *"--stable"* ]] && [[ ! "$*" == *"--next"* ]]; then
+    flightgear_branch="$flightgear_branch"
+    say "DEBUG: Selecting branch '$flightgear_branch'."
+else
+    say "ERROR: Something went wrong on 'git_definitions' when selecting FlightGear branch/version."
+    say "INFO: command line args are $*. flightgear_branch=$flightgear_branch"
+    exit 22
+fi
+say "DEBUG: Finished selecting branch from command line args."
+
+# Set SimGear and FGData branches to be the same as FlightGear
+simgear_branch="$flightgear_branch"
+fgdata_branch="$flightgear_branch"
+
+# SET-RELEASE Block
+# The following code will set the "Release name" according to the branch that was chosen.
+[[ "$flightgear_branch" == "release/"*  ]] && release="$(echo "$flightgear_branch" | awk -O -F '/' 'END {print $2}')"
+[[ "$flightgear_branch" == "next"  ]] && release="Next"
+
+say "DEBUG: Command line args were $*"
+say "DEBUG: $release will be used for FlightGear."
+say "DEBUG: $flightgear_branch branch will be used for FlightGear."
+say "DEBUG: $simgear_branch branch will be used for SimGear."
+say "DEBUG: $fgdata_branch branch will be used for FGData."
+say "DEBUG: $openscenegraph_branch branch will be used for OpenSceneGraph."
+say "DEBUG: $plib_branch branch will be used for PLIB."
+
+say "DEBUG: END OF git_definitions."

@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# FlightGear Installer
+# flightgear_template/flightgear
+#
+# This is a runner, and executable to run FlightGear installed with FlightGear Installer.
+#
+# Author:       Megaf - https://github.com/Megaf - mmegaf [at] gmail [dot] com
+# Date:         03/09/2022
+# GitHub:       https://github.com/Megaf/FlightGear-Installer
+# License:      GPL V3
+
+release="flightgear_release"
+install_directory="flightgear_install_directory"
+
+source "$install_directory/lib/libsay" # Imports libsay for pretty messages.
+
+say "DEBUG: FlightGear Runner starter."
+
+# Set LD library path to lib directory on the install location.
+ld_lib="$install_directory/lib"
+export LD_LIBRARY_PATH="$ld_lib"
+
+is_gdb="$(which gdb)" # Checks if GDB is installed.
+
+say "Welcome to FlightGear!"
+say "FlightGear was proudly installed by FlightGear Installer."
+say "FlightGear Installer was originally create by Megaf."
+say "For bug reports and resquests, please visit:"
+say "https://github.com/Megaf/FlightGear-Installer"
+say "INFO: Library Path set to $LD_LIBRARY_PATH."
+say "INFO: Set an environment variable 'debug=true' to enable gdb/verbose."
+
+if [ "$debug" = "true" ] && [ "$is_gdb" ]; then
+    say "WARNING: Debug is enabled and 'gdb' was found on your system."
+    say "INFO: Running FlightGear in Debug + Verbose mode."
+    say "INFO: Type 'run' in gdb to run."
+    say "INFO: If FG crashes, type 'bt' in gdb to see the backtrace."
+    gdb --args "$install_directory"/bin/fgfs -v "$*"
+
+elif [ "$debug" = "true" ] && [ ! "$is_gdb" ]; then
+    say "WARNING: Debug is enabled but 'gdb' was not found on your system."
+    say "INFO: FlightGear will run in Verbose mode."
+    say "INFO: Install 'gdb' to be able to debug and see backtraces."
+    "$install_directory"/bin/fgfs -v "$*"
+
+elif  [ ! "$debug" = "true" ]; then
+    "$install_directory"/bin/fgfs "$*"
+else
+    say "ERROR: Something went wrong."
+    say "INFO: release=$release, install_directory=$install_directory"
+    say "INFO: ld_lib=$ld_lib, debug=$debug"
+fi
+
+say "DEBUG: FlightGear Runner ended."
+exit 0
