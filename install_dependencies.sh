@@ -21,10 +21,17 @@ detect_os()
         echo "Linux" 
     elif [ "$unames" = "Darwin" ]; then
         echo "macOS"
+        say "ERROR: macOS is not supported just yet."
+        exit 22
     elif [ "$unames" = "FreeBSD" ]; then
         echo "FreeBSD"
+        say "ERROR: FreeBSD is not supported just yet."
+        exit 22
+    elif [ ! "unames" ]; then
+        say "ERROR: Can't detect your OS. Please open an issue or PR on 'https://github.com/Megaf/FlightGear-Installer/issues'."
+        exit 22
     else
-        echo "ERROR: Can't detect OS."
+        echo "ERROR: Your OS is not supported just yet."
         exit 22
     fi
 }
@@ -46,10 +53,6 @@ install_dependencies()
 {
     if [ "$(detect_os)" = "Linux" ]; then
         install_dependencies_linux
-    elif [ "$(detect_os)" = "macOS" ]; then
-        say "ERROR: macOS is not supported yet."
-    elif [ "$(detect_os)" = "FreeBSD" ]; then
-        say "ERROR: FreeBSD is not supported yet."
     else
         say "ERROR: Can't detect the OS running on this system."
         say "DEBUG: END OF install_dependencies.sh"
